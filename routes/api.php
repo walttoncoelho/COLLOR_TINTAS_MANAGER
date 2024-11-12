@@ -11,9 +11,10 @@ use App\Http\Controllers\Api\FormaPagamentoController;
 use App\Http\Controllers\Api\RedeSocialController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\BannerCategoriaController;
+use App\Http\Controllers\Api\MarcaController;
 
 
-
+Route::apiResource('marcas', MarcaController::class);
 Route::get('/banner-categorias', [BannerCategoriaController::class, 'index']);
 Route::apiResource('categorias', CategoriaController::class);
 Route::get('/produtos', [ProdutosController::class, 'index']);

@@ -52,6 +52,14 @@ class SobreEmpresaResource extends Resource
                     ->label('Valores')
                     ->rows(3)
                     ->nullable(), // Não obrigatório
+
+                // Novo campo: Galeria de Imagens (múltiplas imagens)
+                FileUpload::make('galeria_imagens')
+                    ->label('Galeria de Imagens')
+                    ->directory('sobre_empresa/galeria') // Diretório onde as imagens da galeria serão armazenadas
+                    ->image()
+                    ->multiple() // Permite o upload de múltiplas imagens
+                    ->nullable(), // Não obrigatório
             ]);
     }
 
@@ -64,6 +72,13 @@ class SobreEmpresaResource extends Resource
                 TextColumn::make('missao')->label('Missão'),
                 TextColumn::make('visao')->label('Visão'),
                 TextColumn::make('valores')->label('Valores'),
+                // Exibir as imagens da galeria
+                TextColumn::make('galeria_imagens')
+                    ->label('Galeria de Imagens')
+                    ->formatStateUsing(function ($state) {
+                        // Exibe os caminhos das imagens na galeria
+                        return implode(', ', $state);
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
