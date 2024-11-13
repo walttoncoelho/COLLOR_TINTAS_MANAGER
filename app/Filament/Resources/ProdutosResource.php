@@ -57,12 +57,16 @@ class ProdutosResource extends Resource
                     ->maxFiles(1)
                     ->required(),
     
-                FileUpload::make('galeria_produtos')
+                    FileUpload::make('galeria_imagens')
                     ->label('Galeria de Imagens')
-                    ->directory('produtos/galeria')
+                    ->directory('dados-empresa/galeria')
                     ->image()
-                    ->multiple()
-                    ->required(),
+                    ->multiple() // Ensures multiple images are allowed
+                    ->storeFileNamesIn('galeria_imagens') // Store file names in the model attribute
+                    ->enableReordering() // Allows reordering images if desired
+                    ->nullable(),
+                
+                
     
                 Select::make('categoria_id')
                     ->label('Categoria')
