@@ -54,6 +54,11 @@ class DadosEmpresaResource extends Resource
                 Textarea::make('localizacao')
                     ->label('Localização (Google Maps)')
                     ->rows(3), // Campo de localização (Google Maps), não obrigatório
+
+                    TextInput::make('endereco')
+                    ->label('Endereço')
+                    ->nullable(), // Campo opcional
+                
     
                 FileUpload::make('galeria_imagens')  // Novo campo de galeria de imagens
                     ->label('Galeria de Imagens')
@@ -75,6 +80,8 @@ class DadosEmpresaResource extends Resource
                 TextColumn::make('instagram')->label('Instagram'),
                 TextColumn::make('facebook')->label('Facebook'),
                 TextColumn::make('localizacao')->label('Localização'),
+                TextColumn::make('endereco')->label('Endereço'),
+
             ])
             ->filters([
                 //

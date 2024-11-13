@@ -8,8 +8,7 @@ class DadosEmpresa extends Model
 {
     use HasFactory;
 
-    protected $table = 'dados_empresa';
-
+    protected $table = 'dados_empresa'; // Nome correto da tabela
     protected $fillable = [
         'email_comercial',
         'telefone_comercial',
@@ -17,11 +16,9 @@ class DadosEmpresa extends Model
         'instagram',
         'facebook',
         'localizacao',
-        'galeria_imagens', // Certifique-se de adicionar o campo aqui
-    ];
-
-    protected $casts = [
-        'galeria_imagens' => 'array', // Isso garante que os dados sejam armazenados como um array JSON
+        'galeria_imagens',
+        'endereco',
     ];
 }
+
 
