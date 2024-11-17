@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Collection;
 
 class Produtos extends Model
 {
@@ -29,16 +30,14 @@ class Produtos extends Model
         'preco' => 'float'
     ];
 
-    // Adiciona os eventos do modelo para gerar o slug automaticamente
+    // Seu código boot() existente...
     protected static function boot()
     {
         parent::boot();
 
-        // Antes de salvar, gera o slug
         static::creating(function ($produto) {
             $produto->slug = Str::slug($produto->nome);
             
-            // Se já existe um produto com esse slug, adiciona um número no final
             $count = static::whereRaw("slug RLIKE '^{$produto->slug}(-[0-9]+)?$'")->count();
             
             if ($count > 0) {
@@ -46,7 +45,6 @@ class Produtos extends Model
             }
         });
 
-        // Se o nome for atualizado, atualiza o slug
         static::updating(function ($produto) {
             if ($produto->isDirty('nome')) {
                 $produto->slug = Str::slug($produto->nome);
@@ -63,5 +61,74 @@ class Produtos extends Model
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(Categoria::class, 'categoria_id');
+    }
+
+    /**
+     * Retorna produtos relacionados baseados na mesma categoria
+     * 
+     * @param int $limit Número de produtos a retornar
+     * @return Collection
+     */
+// Adicione isso ao seu modelo Produtos.php
+
+public function produtosRelacionadosManual()
+{
+    return $this->belongsToMany(
+        Produtos::class,
+        'produto_relacionado',
+        'produto_id',
+        'produto_relacionado_id'
+    );
+}
+
+public function produtosRelacionados(int $limit = 4): Collection
+{
+    return self::query()
+        ->with('categoria')
+        ->where('categoria_id', $this->categoria_id)
+        ->where('id', '!=', $this->id) // Exclui o produto atual
+        ->inRandomOrder() // Ordem aleatória
+        ->take($limit) // Limita a 4 produtos
+        ->get();
+}
+
+    /**
+     * Retorna produtos relacionados com preço similar
+     * 
+     * @param int $limit Número de produtos a retornar
+     * @param float $variacao Variação permitida no preço (em porcentagem)
+     * @return Collection
+     */
+    public function produtosRelacionadosPreco(int $limit = 4, float $variacao = 20): Collection
+    {
+        $precoMinimo = $this->preco * (1 - ($variacao / 100));
+        $precoMaximo = $this->preco * (1 + ($variacao / 100));
+
+        return self::query()
+            ->with('categoria')
+            ->where('categoria_id', $this->categoria_id)
+            ->where('id', '!=', $this->id)
+            ->whereBetween('preco', [$precoMinimo, $precoMaximo])
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Retorna produtos relacionados priorizando produtos em destaque
+     * 
+     * @param int $limit Número de produtos a retornar
+     * @return Collection
+     */
+    public function produtosRelacionadosDestaque(int $limit = 4): Collection
+    {
+        return self::query()
+            ->with('categoria')
+            ->where('categoria_id', $this->categoria_id)
+            ->where('id', '!=', $this->id)
+            ->orderByDesc('destaque') // Prioriza produtos em destaque
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
     }
 }

@@ -62,9 +62,19 @@ class ProdutosController extends Controller
                 ], 404);
             }
 
-            \Log::info('Produto encontrado:', $produto->toArray());
+            // Busca produtos relacionados
+            $relacionados = $produto->produtosRelacionados();
+            
+            \Log::info('Produto e relacionados encontrados:', [
+                'produto' => $produto->toArray(),
+                'relacionados' => $relacionados->toArray()
+            ]);
 
-            return response()->json($produto);
+            // Retorna o produto com seus relacionados
+            return response()->json([
+                'produto' => $produto,
+                'relacionados' => $relacionados
+            ]);
 
         } catch (\Exception $e) {
             \Log::error('Erro ao buscar produto', [
