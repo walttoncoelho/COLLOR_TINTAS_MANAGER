@@ -14,10 +14,22 @@ use App\Http\Controllers\Api\BannerCategoriaController;
 use App\Http\Controllers\Api\MarcaController;
 
 
+
+
 Route::apiResource('marcas', MarcaController::class);
 Route::get('/banner-categorias', [BannerCategoriaController::class, 'index']);
 Route::apiResource('categorias', CategoriaController::class);
+
+
+
+
 Route::get('/produtos', [ProdutosController::class, 'index']);
+Route::get('/produtos/{slug}', [ProdutosController::class, 'show']);
+
+
+
+
+
 Route::get('/sobre-empresa', [SobreEmpresaController::class, 'index']);
 Route::get('/noticias', [NoticiasController::class, 'index']);
 Route::get('/noticias/{slug}', [NoticiasController::class, 'show']);

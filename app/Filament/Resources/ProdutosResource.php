@@ -16,8 +16,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\RichEditor;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\Grid; // Importação adicionada
-
+use Filament\Forms\Components\Grid;
 
 class ProdutosResource extends Resource
 {
@@ -34,15 +33,22 @@ class ProdutosResource extends Resource
                     ->label('Nome do Produto')
                     ->required(),
     
-                TextInput::make('slug')
-                    ->label('Slug')
-                    ->disabled(), // Preenchimento automático
+// No método form, atualize o campo slug:
+
+    TextInput::make('slug')
+    ->label('Slug')
+    ->disabled()
+    ->dehydrated(true) // Mudamos para true para permitir que o valor seja salvo
+    ->helperText('Será gerado automaticamente a partir do nome')
+    ->unique(ignorable: fn ($record) => $record),
     
                 RichEditor::make('descricao')
                     ->label('Descrição do Produto')
                     ->required()
                     ->toolbarButtons([
-                        'bold', 'italic', 'underline', 'strike', 'blockquote', 'bulletList', 'numberList', 'link', 'image', 'code', 'codeBlock', 'clearFormatting',
+                        'bold', 'italic', 'underline', 'strike', 'blockquote', 
+                        'bulletList', 'numberList', 'link', 'image', 'code', 
+                        'codeBlock', 'clearFormatting',
                     ]),
     
                 TextInput::make('preco')
@@ -57,28 +63,19 @@ class ProdutosResource extends Resource
                     ->maxFiles(1)
                     ->required(),
     
-                    FileUpload::make('galeria_imagens')
+                FileUpload::make('galeria_produtos') // Corrigido para o nome correto
                     ->label('Galeria de Imagens')
                     ->directory('dados-empresa/galeria')
                     ->image()
-                    ->multiple() // Ensures multiple images are allowed
-                    ->storeFileNamesIn('galeria_imagens') // Store file names in the model attribute
-                    ->enableReordering() // Allows reordering images if desired
+                    ->multiple()
+                    ->storeFileNamesIn('galeria_produtos') // Corrigido para o nome correto
+                    ->enableReordering()
                     ->nullable(),
-                
-                
     
                 Select::make('categoria_id')
                     ->label('Categoria')
                     ->relationship('categoria', 'nome')
                     ->required(),
-    
-                Select::make('produtosSimilares')
-                    ->label('Produtos Similares')
-                    ->relationship('produtosSimilares', 'nome')
-                    ->multiple()
-                    ->searchable()
-                    ->preload(),
     
                 Grid::make(1)->schema([
                     Checkbox::make('outros_materiais')
@@ -102,23 +99,20 @@ class ProdutosResource extends Resource
             ->columns([
                 TextColumn::make('nome')->label('Nome do Produto'),
                 TextColumn::make('slug')->label('Slug'),
-                TextColumn::make('preco')->label('Preço'),
+                TextColumn::make('preco')
+                    ->label('Preço')
+                    ->money('BRL'),
 
-                // Coluna para exibir a capa
-                ImageColumn::make('capa')->label('Capa')->disk('public'),
+                ImageColumn::make('capa')
+                    ->label('Capa')
+                    ->disk('public'),
 
-                // Coluna para exibir a galeria de imagens
-                TextColumn::make('galeria_produtos')
-                    ->label('Galeria')
-                    ->formatStateUsing(function ($state) {
-                        return collect(explode(',', $state))->map(function ($imagem) {
-                            return "<img src='" . asset("storage/" . $imagem) . "' alt='Galeria' width='50' style='margin-right:5px;'>";
-                        })->implode(' ');
-                    })
-                    ->html(), // Habilita HTML para exibir as imagens formatadas
-
-                TextColumn::make('categoria.nome')->label('Categoria'),
-                TextColumn::make('linha_industrial')->label('Linha Industrial')->toggleable(),
+                TextColumn::make('categoria.nome')
+                    ->label('Categoria'),
+                    
+                TextColumn::make('linha_industrial')
+                    ->label('Linha Industrial')
+                    ->toggleable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
