@@ -19,7 +19,8 @@ class Produtos extends Model
         'categoria_id',
         'destaque',
         'outros_materiais',
-        'linha_industrial'
+        'linha_industrial',
+        'part_number',
     ];
 
     protected $casts = [

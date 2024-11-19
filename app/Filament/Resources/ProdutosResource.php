@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProdutosResource\Pages;
 use App\Models\Produtos;
-use App\Models\Categoria; // Adicionando o import da Categoria
+use App\Models\Categoria;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -28,52 +28,68 @@ class ProdutosResource extends Resource
     protected static ?string $navigationGroup = 'Produtos';
     protected static ?string $modelLabel = 'Produto';
     protected static ?string $pluralModelLabel = 'Produtos';
+    protected static ?string $breadcrumb = 'Produtos';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Section::make('Informações Básicas')
-                    ->schema([
-                        TextInput::make('nome')
-                            ->label('Nome do Produto')
-                            ->required()
-                            ->maxLength(255),
 
-                        TextInput::make('slug')
-                            ->label('Slug')
-                            ->disabled()
-                            ->dehydrated(true)
-                            ->helperText('Será gerado automaticamente a partir do nome')
-                            ->unique(ignorable: fn ($record) => $record),
-
+                ->schema([
+                    TextInput::make('nome')
+                        ->label('Nome do Produto')
+                        ->required()
+                        ->maxLength(255),
+            
+                    TextInput::make('part_number')
+                        ->label('Part Number')
+                        ->helperText('Código de identificação do produto (opcional)')
+                        ->maxLength(50)
+                        ->nullable(),
+            
+                    TextInput::make('slug')
+                        ->label('Slug')
+                        ->disabled()
+                        ->dehydrated(true)
+                        ->helperText('Será gerado automaticamente a partir do nome')
+                        ->unique(ignorable: fn ($record) => $record),
+                   
+    
                         Select::make('categoria_id')
                             ->label('Categoria')
                             ->options(Categoria::pluck('nome', 'id'))
                             ->required()
-                            ->searchable(),
-
+                            ->searchable()
+                            ->placeholder('Selecione uma categoria'),
+    
                         TextInput::make('preco')
                             ->label('Preço')
                             ->numeric()
                             ->required()
                             ->minValue(0)
-                            ->prefix('R$'),
+                            ->prefix('R$')
+                            ->placeholder('0,00'),
                     ])->columns(2),
 
+                    
+    
                 Section::make('Descrição')
                     ->schema([
                         RichEditor::make('descricao')
                             ->label('Descrição do Produto')
                             ->required()
+                            ->placeholder('Digite a descrição do produto')
+                            ->columnSpanFull()
                             ->toolbarButtons([
                                 'bold', 'italic', 'underline', 'strike', 
                                 'bulletList', 'numberedList',
                                 'h2', 'h3',
                                 'link', 'undo', 'redo'
-                            ]),
-                    ]),
-
+                            ])
+                            ->extraInputAttributes(['style' => 'min-height: 300px;'])
+                    ])->columns(1),
+    
                 Section::make('Imagens')
                     ->schema([
                         FileUpload::make('capa')
@@ -84,8 +100,9 @@ class ProdutosResource extends Resource
                             ->imageCropAspectRatio('1:1')
                             ->maxSize(2048)
                             ->maxFiles(1)
-                            ->required(),
-
+                            ->required()
+                            ->helperText('Dimensão recomendada: 1000x1000px'),
+    
                         FileUpload::make('galeria_produtos')
                             ->label('Galeria de Imagens')
                             ->directory('produtos/galeria')
@@ -95,37 +112,37 @@ class ProdutosResource extends Resource
                             ->maxFiles(5)
                             ->reorderable()
                             ->storeFileNamesIn('galeria_produtos')
-                            ->nullable(),
+                            ->nullable()
+                            ->helperText('Máximo de 5 imagens'),
                     ])->columns(2),
-
+    
                 Section::make('Características')
                     ->schema([
                         Checkbox::make('destaque')
-                            ->label('Destaque')
+                            ->label('Produto em Destaque')
+                            ->helperText('Marque esta opção para exibir o produto em destaque')
                             ->default(false),
                     ]),
-
-                    Section::make('Produtos Relacionados')
-    ->schema([
-        Placeholder::make('produtos_relacionados')
-            ->content(function (?Produtos $record): string {
-                if (!$record || !$record->exists) {
-                    return 'Os produtos relacionados serão mostrados após salvar.';
-                }
-
-                $relacionados = $record->produtosRelacionados();
-
-                if ($relacionados->isEmpty()) {
-                    return 'Nenhum produto relacionado encontrado na mesma categoria.';
-                }
-
-                return $relacionados->pluck('nome')->join(', ');
-            })
-    ])
-    ->visibleOn('edit')
-    ->collapsible(),
-
-
+    
+                Section::make('Produtos Relacionados')
+                    ->schema([
+                        Placeholder::make('produtos_relacionados')
+                            ->content(function (?Produtos $record): string {
+                                if (!$record || !$record->exists) {
+                                    return 'Os produtos relacionados serão mostrados após salvar.';
+                                }
+    
+                                $relacionados = $record->produtosRelacionados();
+    
+                                if ($relacionados->isEmpty()) {
+                                    return 'Nenhum produto relacionado encontrado na mesma categoria.';
+                                }
+    
+                                return $relacionados->pluck('nome')->join(', ');
+                            })
+                    ])
+                    ->visibleOn('edit')
+                    ->collapsible(),
             ]);
     }
 
@@ -170,17 +187,28 @@ class ProdutosResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('categoria')
-                    ->relationship('categoria', 'nome'),
-                Tables\Filters\TernaryFilter::make('destaque'),
+                    ->relationship('categoria', 'nome')
+                    ->label('Filtrar por Categoria'),
+                Tables\Filters\TernaryFilter::make('destaque')
+                    ->label('Filtrar Destaques'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Editar'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Excluir'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Excluir Selecionados'),
                 ]),
+            ])
+            ->emptyStateHeading('Nenhum produto encontrado')
+            ->emptyStateDescription('Crie um produto clicando no botão abaixo.')
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Novo Produto'),
             ]);
     }
 
@@ -191,5 +219,21 @@ class ProdutosResource extends Resource
             'create' => Pages\CreateProdutos::route('/create'),
             'edit' => Pages\EditProdutos::route('/{record}/edit'),
         ];
+    }
+
+    // Tradução de labels específicos
+    public static function getCreateButtonLabel(): string
+    {
+        return 'Novo Produto';
+    }
+
+    public static function getEditButtonLabel(): string
+    {
+        return 'Editar Produto';
+    }
+
+    public static function getDeleteButtonLabel(): string
+    {
+        return 'Excluir Produto';
     }
 }

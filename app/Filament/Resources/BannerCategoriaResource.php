@@ -13,16 +13,14 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn; 
 use Filament\Tables\Columns\ImageColumn; 
 use Filament\Forms\Components\TextInput; 
-use Filament\Forms\Components\MultiSelect;
-use Filament\Forms\Components\FileUpload; 
 use Filament\Forms\Components\Select;
-
+use Filament\Forms\Components\FileUpload; 
+use Filament\Forms\Components\Section;
 
 class BannerCategoriaResource extends Resource
 {
-    protected static ?string $navigationLabel = 'Banner Categoria';
     protected static ?string $model = BannerCategoria::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-photo';
     protected static ?string $navigationGroup = 'Banners';
 
     public static function getLabel(): string
@@ -34,45 +32,59 @@ class BannerCategoriaResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('titulo')
-                    ->label('Título')
-                    ->required(),
+                Section::make('Informações do Banner')
+                    ->schema([
+                        TextInput::make('titulo')
+                            ->label('Título')
+                            ->required()
+                            ->placeholder('Digite o título do banner')
+                            ->columnSpan(2),
 
-                Select::make('ordem')
-                    ->label('Ordem de Exibição')
-                    ->options([
-                        1 => '1',
-                        2 => '2',
-                        3 => '3',
-                        4 => '4',
-                        5 => '5',
-                        6 => '6',
+                        Select::make('ordem')
+                            ->label('Ordem de Exibição')
+                            ->options([
+                                1 => 'Posição 1',
+                                2 => 'Posição 2',
+                                3 => 'Posição 3',
+                                4 => 'Posição 4',
+                                5 => 'Posição 5',
+                                6 => 'Posição 6',
+                            ])
+                            ->required()
+                            ->helperText('Define a ordem de exibição do banner')
+                            ->columnSpan(1),
+
+                        Select::make('categorias')
+                            ->label('Categorias')
+                            ->multiple()
+                            ->options(Categoria::all()->pluck('nome', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Selecione uma ou mais categorias')
+                            ->columnSpan(1),
                     ])
-                    ->required(),
+                    ->columns(2),
 
-                FileUpload::make('banner_desktop')
-                    ->label('Banner Desktop (1484 x 476)')
-                    ->directory('banners/categorias/desktop')
-                    ->image()
-                    ->helperText('Faça o upload de uma imagem com as dimensões 1484x476.')
-                    ->required(),
+                Section::make('Imagens do Banner')
+                    ->schema([
+                        FileUpload::make('banner_desktop')
+                            ->label('Banner Desktop')
+                            ->directory('banners/categorias/desktop')
+                            ->image()
+                            ->required()
+                            ->helperText('Dimensões recomendadas: 1484x476 pixels')
+                            ->columnSpan(1),
 
-                FileUpload::make('banner_mobile')
-                    ->label('Banner Mobile (375 x 247)')
-                    ->directory('banners/categorias/mobile')
-                    ->image()
-                    ->helperText('Faça o upload de uma imagem com as dimensões 375x247.')
-                    ->required(),
-
-                    Select::make('categorias')
-                    ->label('Categorias')
-                    ->multiple()  // Permite múltiplas seleções
-                    ->options(Categoria::all()->pluck('nome', 'id')->toArray())  // Pluck 'nome' como label e 'id' como valor
-                    ->required(),  // Campo obrigatório
-                
-                
-                
-                
+                        FileUpload::make('banner_mobile')
+                            ->label('Banner Mobile')
+                            ->directory('banners/categorias/mobile')
+                            ->image()
+                            ->required()
+                            ->helperText('Dimensões recomendadas: 375x247 pixels')
+                            ->columnSpan(1),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -80,14 +92,31 @@ class BannerCategoriaResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('titulo')->label('Título'),
-                TextColumn::make('ordem')->label('Ordem'),
-                ImageColumn::make('banner_desktop')->label('Banner Desktop')->disk('public'),
-                ImageColumn::make('banner_mobile')->label('Banner Mobile')->disk('public'),
-                TextColumn::make('categorias.nome')->label('Categorias')->separator(', '),
+                ImageColumn::make('banner_desktop')
+                    ->label('Banner Desktop')
+                    ->disk('public')
+                    ->square(),
+
+                TextColumn::make('titulo')
+                    ->label('Título')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('ordem')
+                    ->label('Ordem')
+                    ->sortable()
+                    ->badge()
+                    ->color('primary'),
+
+                TextColumn::make('categorias.nome')
+                    ->label('Categorias')
+                    ->separator(', ')
+                    ->wrap(),
             ])
+            ->defaultSort('ordem', 'asc')
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

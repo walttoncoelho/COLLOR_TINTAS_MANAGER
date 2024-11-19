@@ -1,0 +1,21 @@
+{
+    "Dashboard": "Painel",
+    "Login": "Entrar",
+    "Logout": "Sair",
+    "Profile": "Perfil",
+    "Save": "Salvar",
+    "Cancel": "Cancelar",
+    "Delete": "Excluir",
+    "Create": "Criar",
+    "Edit": "Editar",
+    "Back": "Voltar",
+    "Close": "Fechar",
+    "Filter": "Filtrar",
+    "Reset": "Resetar",
+    "Search": "Buscar",
+    "No records found": "Nenhum registro encontrado",
+    "Loading": "Carregando",
+    "Are you sure?": "Tem certeza?",
+    "This action cannot be undone.": "Esta ação não pode ser desfeita.",
+    "Create & create another": "Criar e criar outro"
+}
