@@ -7,7 +7,7 @@ return [
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 
 
-    'allowed_origins' => ['http://localhost:5173', 'https://manager.santaritahomecenter.com', ],
+    'allowed_origins' => ['http://localhost:5173', 'https://collormixstore.com', 'https://www.collormixstore.com', 'https://manager.santaritahomecenter.com', ],
 
 
     'allowed_origins_patterns' => [],
