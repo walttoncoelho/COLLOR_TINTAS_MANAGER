@@ -12,8 +12,13 @@ class BannerHome extends Model
 
     protected $fillable = [
         'titulo', 
+        'link',
+        'status',
         'ordem', 
         'banner_desktop', 
         'banner_mobile'
+    ];
+    protected $casts = [
+        'status' => 'boolean',
     ];
 }
