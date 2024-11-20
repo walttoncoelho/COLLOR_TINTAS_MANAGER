@@ -18,16 +18,15 @@ use App\Http\Controllers\Api\MarcaController;
 
 Route::apiResource('marcas', MarcaController::class);
 Route::get('/banner-categorias', [BannerCategoriaController::class, 'index']);
+
+
 Route::apiResource('categorias', CategoriaController::class);
-
-
+Route::get('categorias/slug/{slug}', [CategoriaController::class, 'findBySlug']);
+Route::get('produtos/categoria/{slug}', [CategoriaController::class, 'getProdutosByCategoria']);
 
 
 Route::get('/produtos', [ProdutosController::class, 'index']);
 Route::get('/produtos/{slug}', [ProdutosController::class, 'show']);
-
-
-
 
 
 Route::get('/sobre-empresa', [SobreEmpresaController::class, 'index']);

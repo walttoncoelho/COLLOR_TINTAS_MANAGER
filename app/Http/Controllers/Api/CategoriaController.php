@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Categoria;
+use App\Models\Produto;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
@@ -48,5 +49,18 @@ class CategoriaController extends Controller
         $categoria->delete();
 
         return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    public function findBySlug($slug)
+    {
+        $categoria = Categoria::where('slug', $slug)->firstOrFail();
+        return response()->json($categoria, Response::HTTP_OK);
+    }
+
+    public function getProdutosByCategoria($slug)
+    {
+        $categoria = Categoria::where('slug', $slug)->firstOrFail();
+        $produtos = Produto::where('categoria_id', $categoria->id)->get();
+        return response()->json($produtos, Response::HTTP_OK);
     }
 }
