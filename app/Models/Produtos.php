@@ -14,6 +14,7 @@ class Produtos extends Model
         'slug',
         'descricao',
         'preco',
+        'preco_promocional',
         'capa',
         'galeria_produtos',
         'categoria_id',

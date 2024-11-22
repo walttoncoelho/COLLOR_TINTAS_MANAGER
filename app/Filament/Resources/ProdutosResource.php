@@ -70,6 +70,17 @@ class ProdutosResource extends Resource
                             ->minValue(0)
                             ->prefix('R$')
                             ->placeholder('0,00'),
+
+                            TextInput::make('preco_promocional')
+                            ->label('Preço Promocional')
+                            ->numeric()
+                            ->minValue(0)
+                            ->prefix('R$')
+                            ->placeholder('0,00')
+                            ->helperText('Insira o preço promocional, se aplicável (opcional)')
+                            ->nullable(),
+                        
+
                     ])->columns(2),
 
                     
@@ -171,6 +182,12 @@ class ProdutosResource extends Resource
                     ->label('Preço')
                     ->money('BRL')
                     ->sortable(),
+
+                    TextColumn::make('preco_promocional')
+                    ->label('Preço Promocional')
+                    ->money('BRL')
+                    ->sortable(),
+                
 
                 TextColumn::make('destaque')
                     ->label('Destaque')
