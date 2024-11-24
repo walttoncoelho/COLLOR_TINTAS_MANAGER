@@ -4,15 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
@@ -27,45 +27,60 @@ class UserResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->label('Nome')
-                    ->placeholder('Digite o nome de usuário')
-                    ->required(),
-    
+                    ->required()
+                    ->maxLength(255),
+
                 TextInput::make('email')
                     ->label('Email')
                     ->email()
-                    ->placeholder('Digite seu e-mail')
-                    ->default('') // Define o valor inicial como vazio
-                    ->autocomplete('off')
-                    ->required(),
-    
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
+
                 TextInput::make('password')
                     ->label('Senha')
                     ->password()
-                    ->placeholder('Digite uma senha de 6 dígitos')
-                    ->autocomplete('off')
-                    ->default('') // Define o valor inicial como vazio
-                    ->required()
-                    ->minLength(6),
+                    ->minLength(6)
+                    ->dehydrateStateUsing(fn ($state) => 
+                        !empty($state) ? Hash::make($state) : null
+                    )
+                    ->required(fn ($context) => $context === 'create')
+                    ->confirmed(),
+
+                TextInput::make('password_confirmation')
+                    ->label('Confirmar Senha')
+                    ->password()
+                    ->required(fn ($context) => $context === 'create')
+                    ->dehydrated(false),
             ]);
     }
-    
-
-    
-    
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('Nome'),
-                TextColumn::make('email')->label('Email'),
-                BooleanColumn::make('email_verified_at')->label('Email Verificado')->toggleable(),
+                TextColumn::make('name')
+                    ->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+                    
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable(),
+                    
+                BooleanColumn::make('email_verified_at')
+                    ->label('Email Verificado')
+                    ->sortable(),
+            ])
+            ->filters([
+                //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ]);
     }
 

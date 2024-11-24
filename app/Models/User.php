@@ -18,7 +18,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
-        'email_verified_at', // Inclua este campo se for usar verificação de e-mail
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -31,18 +31,10 @@ class User extends Authenticatable implements FilamentUser
         'password' => 'hashed',
     ];
 
-    // Gera o remember_token automaticamente ao criar o usuário
-    protected static function booted()
-    {
-        static::creating(function ($user) {
-            $user->remember_token = Str::random(60);
-            $user->email_verified_at = now(); // Validação automática do e-mail
-        });
-    }
-
-    // Método para verificar se o usuário pode acessar o painel Filament
+    // Removido o mutator de senha para evitar duplo hashing
+    
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, '@gmail.com') && $this->hasVerifiedEmail();
+        return true; // ou sua lógica de acesso
     }
 }
